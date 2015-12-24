@@ -19,6 +19,7 @@
 #
 ##############################################################################
 
+from openerp import models, api
 from openerp.osv import fields
 from openerp.osv.orm import Model
 
@@ -36,6 +37,13 @@ class product_transfer(Model):
         'origin': fields.many2one('destination', 'Origin'),
         'to': fields.many2one('destination', 'To')
     }
+
+    @api.one
+    def unlink(self):
+        product = self.product_id
+        res = super(product_transfer, self).unlink()
+        product.unlink()
+        return res
 
     def price_get_partner(self, cr, uid, cls, to_search, params, context=None):
         price = 0.0

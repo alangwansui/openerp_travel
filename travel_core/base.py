@@ -20,9 +20,9 @@
 ##############################################################################
 
 import datetime as dt
-
 from openerp.osv import fields
 from openerp.osv.orm import Model
+from openerp import api
 
 
 class res_partner(Model):
@@ -51,7 +51,7 @@ class res_partner(Model):
                                            relation='sale.order.line',
                                            string='Reservations'),
         'pax': fields.boolean('Pax'),
-        # TODO: poner el campo pax tambien en el formulario de partner
+
     }
 
     def create(self, cr, uid, vals, context=None):
@@ -60,10 +60,32 @@ class res_partner(Model):
             vals['supplier'] = True
         return super(res_partner, self).create(cr, uid, vals, context)
 
+    @api.one
+    @api.onchange('pax')
+    def change_pax_company(self):
+        self.is_company = not self.pax
+
+    @api.multi
+    def onchange_type(self, is_company):
+        res = super(res_partner, self).onchange_type(is_company)
+        if res:
+            try:
+                val = res['value']
+                if val:
+                    val['pax'] = not is_company
+                return res
+            except KeyError:
+                return res
+        return res
+
     _sql_constraints = [
         ('name_partner_unique', 'unique (name)',
          'The name of the partner must be unique !'),
     ]
+
+    _defaults = {
+        'pax': True
+    }
 
 
 class option_type(Model):
@@ -90,7 +112,8 @@ class option_value(Model):
     def get_id_by_code(self, cr, uid, code, context=None):
         res = self.search(cr, uid, [('code', '=', code)], context=context)
         return res and res[0] or False
-    
+
+
 class destination(Model):
     _name = 'destination'
     _columns = {

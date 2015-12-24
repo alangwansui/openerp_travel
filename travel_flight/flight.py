@@ -19,6 +19,7 @@
 #
 ##############################################################################
 
+from openerp import api
 from openerp.osv import fields
 from openerp.osv.orm import Model
 
@@ -37,6 +38,13 @@ class product_flight(Model):
                                       string='Name', size=128, select=True,
                                       store=True),
     }
+
+    @api.one
+    def unlink(self):
+        product = self.product_id
+        res = super(product_flight, self).unlink()
+        product.unlink()
+        return res
 
     _order = 'flight_name asc'
 

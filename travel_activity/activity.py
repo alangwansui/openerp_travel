@@ -19,6 +19,7 @@
 #
 ##############################################################################
 
+from openerp import api
 from openerp.osv import fields
 from openerp.osv.orm import Model
 
@@ -35,6 +36,13 @@ class product_activity(Model):
                                         string='Name', size=128, select=True,
                                         store=True)
     }
+
+    @api.one
+    def unlink(self):
+        product = self.product_id
+        res = super(product_activity, self).unlink()
+        product.unlink()
+        return res
 
     def price_get_partner(self, cr, uid, cls, to_search, params, context=None):
         price = 0.0

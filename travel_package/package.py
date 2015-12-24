@@ -20,7 +20,7 @@
 ##############################################################################
 
 import datetime as dt
-
+from openerp import api
 from openerp.osv import fields
 from openerp.osv.orm import Model
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT as DF
@@ -52,6 +52,13 @@ class product_package(Model):
                                      store=True),
         'product_line_ids': fields.one2many('product.package.line', 'package_id', 'Package')
     }
+
+    @api.one
+    def unlink(self):
+        product = self.product_id
+        res = super(product_package, self).unlink()
+        product.unlink()
+        return res
 
     def price_get_partner(self, cr, uid, cls, to_search, params, context=None):
 

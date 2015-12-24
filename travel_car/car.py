@@ -20,7 +20,7 @@
 ##############################################################################
 
 import datetime as dt
-
+from openerp import api
 from openerp.osv import fields
 from openerp.osv.orm import Model
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT as DF
@@ -44,6 +44,13 @@ class product_car(Model):
                                domain="[('option_type_id.code', '=', 'cl')]"),
         'passengers': fields.integer('Passengers'),
     }
+
+    @api.one
+    def unlink(self):
+        product = self.product_id
+        res = super(product_car, self).unlink()
+        product.unlink()
+        return res
 
     def price_get_partner(self, cr, uid, cls, to_search, params, context=None):
         price = 0.0
